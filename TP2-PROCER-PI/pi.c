@@ -68,27 +68,27 @@ int socket_client(char* host,char* puerto){
 
 	   printf("LLegue hasta antes del send_ansisop_file\n");
 
-	   	//Enviar datos
-	    if((send_ansisop_file(sockfd)) != 0){
-	    	error("ERROR en el send_ansisop_file");
-	    }
+	   //Enviar datos
+	   if((send_ansisop_file(sockfd)) != 0){
+		   error("ERROR en el send_ansisop_file");
+	   }
 
-	    printf("Pase el send_ansisop_file\n");
+	   printf("Pase el send_ansisop_file\n");
 
-	    //Recibimos confirmacion
-	    if((bytes_recived=recv(sockfd,buffer,256,0)) <= 0){
-	    	if( bytes_recived == 0){
-	    		printf("El servidor cerro la conexion sin enviar confirmacion\n");
-	    	}else{
-	    		error("ERROR en el recv");
-	    	}
-	    }
+	   //Recibimos confirmacion
+	   if((bytes_recived=recv(sockfd,buffer,256,0)) <= 0){
+		   if( bytes_recived == 0){
+		   	   printf("El servidor cerro la conexion sin enviar confirmacion\n");
+		   }else{
+			   error("ERROR en el recv");
+		   }
+	   }
 
-	    printf("El mensaje recibido es: %s\n",buffer);
+	   printf("El mensaje recibido es: %s\n",buffer);
 
-	    close(sockfd);
+	   close(sockfd);
 
-	    return 0;
+	   return 0;
 }
 void error(const char *msg)
 {
@@ -98,7 +98,7 @@ void error(const char *msg)
 int send_ansisop_file(int sockfd){
 	char *nombre_archivo="/home/utnso/hola";
 	FILE *archivo;
-	char *buffer=(char *)malloc(1024);
+	char *buffer=(char *)malloc(1024);//TODO: malloc por el tamaño del archivo
 	char caracter;
 	int cant_caracteres = 0;
 
@@ -130,6 +130,7 @@ int send_ansisop_file(int sockfd){
 	}
 	printf("Todo enviado\n");
 	fclose(archivo);
+	bzero(buffer,sizeof(buffer));
 	return 0;
 }
 
