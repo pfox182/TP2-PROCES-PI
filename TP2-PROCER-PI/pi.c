@@ -16,7 +16,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-
+//Includes propios
+#include "FuncionesPropias/manejo_archivos.h"
+//Prototipos
 void error(const char *msg);
 int socket_client(char* host,char* puerto);
 int send_ansisop_file(int sockfd);
@@ -97,24 +99,7 @@ void error(const char *msg)
 }
 int send_ansisop_file(int sockfd){
 	char *nombre_archivo="/home/utnso/hola";
-	FILE *archivo;
-	char *buffer=(char *)malloc(1024);//TODO: malloc por el tamaño del archivo
-	char caracter;
-	int cant_caracteres = 0;
-
-	archivo=fopen (nombre_archivo, "r");
-	if( archivo == NULL){
-		error("Error de apertura del archivo\n");
-	}
-
-
-	while(feof(archivo) == 0){
-		caracter = fgetc(archivo);
-		buffer[cant_caracteres]=caracter;
-		cant_caracteres++;
-		//fscanf(archivo,"%s", *buffer) != EOF //Otra forma de leer
-	}
-	buffer[cant_caracteres]='\0';
+	char *buffer=leer_archivo(nombre_archivo);
 
 	//Armamos el paquete a enviar al server
 	int header = strlen(buffer);
@@ -129,7 +114,6 @@ int send_ansisop_file(int sockfd){
 		error("Error al enviar el paquete");
 	}
 	printf("Todo enviado\n");
-	fclose(archivo);
 	bzero(buffer,sizeof(buffer));
 	return 0;
 }
