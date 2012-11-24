@@ -16,14 +16,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#define BUFFER_SIZE 1024 //TODO:nose
+
 //Includes propios
 #include "FuncionesPropias/manejo_archivos.h"
+#include "FuncionesPropias/manejo_mensajes.h"
 //Prototipos
 void error(const char *msg);
 int socket_client(char* host,char* puerto);
 int send_ansisop_file(int sockfd);
-int sendall(int sockfd,char *buffer, int *len);
-
 
 int main(int argc, char *argv[])
 {
@@ -42,9 +43,8 @@ int socket_client(char* host,char* puerto){
 		int sockfd, portno;
 	    struct sockaddr_in serv_addr;
 	    struct hostent *server;
-
-	    char *buffer;
-	    int bytes_recived;
+	    char *buffer=(char *)malloc(BUFFER_SIZE);//Se hace realloc en recibir mensaje
+	    char *respuesta=(char *)malloc(strlen("si"));
 
 	    portno = atoi(puerto);
 
@@ -64,31 +64,42 @@ int socket_client(char* host,char* puerto){
 	    serv_addr.sin_addr = *((struct in_addr *)server->h_addr);
 	    memset(&(serv_addr.sin_zero),'\0',8);
 
+	    //Nos conectamos
 	    if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) == -1){
 	        error("ERROR connecting");
 	    }
 
-	   printf("LLegue hasta antes del send_ansisop_file\n");
-
-	   //Enviar datos
+	   /* //Verificamos mpp o mps
+	    recibir_mensaje(buffer,sockfd);
+	    printf("%s\n",buffer);
+	    if( strstr(buffer,"mps") != NULL){
+	    	close(sockfd);
+	    	return 1;//No retorna con error, es un error del flujo normal
+	    }
+	    */
+	   //Enviar codigo
 	   if((send_ansisop_file(sockfd)) != 0){
 		   error("ERROR en el send_ansisop_file");
 	   }
 
-	   printf("Pase el send_ansisop_file\n");
+	   //Recibimos fin,imprimir y suspend
+	   recibir_mensaje(buffer,sockfd);
 
-	   //Recibimos confirmacion
-	   if((bytes_recived=recv(sockfd,buffer,256,0)) <= 0){
-		   if( bytes_recived == 0){
-		   	   printf("El servidor cerro la conexion sin enviar confirmacion\n");
-		   }else{
-			   error("ERROR en el recv");
+	   while( strstr(buffer,"fin") == NULL ){
+		   printf("%s\n",buffer);
+		   if( strstr(buffer,"suspendido") != NULL){
+			   //tenemos que responder
+			   scanf("%s",respuesta);//TODO:validar datos de entrada
+			   printf("La respuesta que ingresaste es %s\n",respuesta);
+			   enviar_mensaje(respuesta,sockfd);
 		   }
+		   recibir_mensaje(buffer,sockfd);
 	   }
 
-	   printf("El mensaje recibido es: %s\n",buffer);
 
-	   close(sockfd);
+	   printf("%s\n",buffer);
+
+	   //close(sockfd);
 
 	   return 0;
 }
@@ -101,37 +112,10 @@ int send_ansisop_file(int sockfd){
 	char *nombre_archivo="/home/utnso/hola";
 	char *buffer=leer_archivo(nombre_archivo);
 
-	//Armamos el paquete a enviar al server
-	int header = strlen(buffer);
-	printf("Header:%d\n",header);
-	//Enviamos el header para indicar el tamaño del paquete
-	if( send(sockfd,&header,sizeof(header),0) == -1){
-		error("Error al enviar el header");
-	}
-	printf("BUffer:%s\n",buffer);
-	//Enviamos el paquete
-	if( sendall(sockfd,&(*buffer),&header) == -1){
-		error("Error al enviar el paquete");
-	}
-	printf("Todo enviado\n");
+	enviar_mensaje(buffer,sockfd);
 	bzero(buffer,sizeof(buffer));
 	return 0;
 }
 
-int sendall(int sockfd,char *buffer, int *len){
-	int total=0;//Los bytes que enviamos hasta ahora
-	int bytes_left=*len;//Los bytes que faltan enviar
-	int n = 0;
 
-	while( total < *len){
-		n = send(sockfd,buffer+total, bytes_left,0);
-		if( n == -1){break;}
-		total =+ n;
-		bytes_left =- n;
-	}
-
-	*len = total;//Cantidad de paquetes enviados en realidad
-
-	return n==-1?-1:0;//Que copada esta sentencia XP
-}
 
