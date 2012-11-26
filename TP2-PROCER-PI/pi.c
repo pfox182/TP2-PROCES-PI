@@ -69,35 +69,39 @@ int socket_client(char* host,char* puerto){
 	        error("ERROR connecting");
 	    }
 
-	   /* //Verificamos mpp o mps
-	    recibir_mensaje(buffer,sockfd);
-	    printf("%s\n",buffer);
-	    if( strstr(buffer,"mps") != NULL){
-	    	close(sockfd);
-	    	return 1;//No retorna con error, es un error del flujo normal
-	    }
-	    */
-	   //Enviar codigo
-	   if((send_ansisop_file(sockfd)) != 0){
-		   error("ERROR en el send_ansisop_file");
+		//Enviar codigo
+	    if((send_ansisop_file(sockfd)) != 0){
+	    	error("ERROR en el send_ansisop_file");
 	   }
 
 	   //Recibimos fin,imprimir y suspend
-	   recibir_mensaje(buffer,sockfd);
-
-	   while( strstr(buffer,"fin") == NULL ){
+	   if ( recibir_mensaje(buffer,sockfd) == -1){
+		   return -1;
+	   }
+	   while( strstr(buffer,"finalizado") == NULL ){
 		   printf("%s\n",buffer);
+		   if( strstr(buffer,"mps") != NULL){
+				close(sockfd);
+				return -1;//No retorna con error, es un error del flujo normal
+			}
+		   if( strstr(buffer,"mmp") != NULL){
+			   if((send_ansisop_file(sockfd)) != 0){
+					error("ERROR en el send_ansisop_file");
+			   }
+			}
 		   if( strstr(buffer,"suspendido") != NULL){
 			   //tenemos que responder
-			   scanf("%s",respuesta);//TODO:validar datos de entrada
 			   printf("La respuesta que ingresaste es %s\n",respuesta);
-			   enviar_mensaje(respuesta,sockfd);
+			   if ( enviar_mensaje(respuesta,sockfd) == -1){
+				   return -1;
+			   }
 		   }
-		   recibir_mensaje(buffer,sockfd);
+		   if ( recibir_mensaje(buffer,sockfd) == -1){
+			   return -1;
+		   }
 	   }
 
-
-	   printf("%s\n",buffer);
+	   printf("El buffer es: %s\n",buffer);
 
 	   //close(sockfd);
 
@@ -109,7 +113,7 @@ void error(const char *msg)
     exit(0);
 }
 int send_ansisop_file(int sockfd){
-	char *nombre_archivo="/home/utnso/hola";
+	char *nombre_archivo="/home/utnso/hola1";
 	char *buffer=leer_archivo(nombre_archivo);
 
 	enviar_mensaje(buffer,sockfd);
