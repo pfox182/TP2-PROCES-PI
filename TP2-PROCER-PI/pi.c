@@ -17,29 +17,40 @@
 #include <netinet/in.h>
 
 #define BUFFER_SIZE 1024 //TODO:nose
+//Variables globales
+char *host;
+char *puerto;
 
 //Includes propios
 #include "FuncionesPropias/manejo_archivos.h"
 #include "FuncionesPropias/manejo_mensajes.h"
 //Prototipos
 void error(const char *msg);
-int socket_client(char* host,char* puerto);
-int send_ansisop_file(int sockfd);
+int socket_client(char *nombre_archivo);
+int send_ansisop_file(int sockfd,char *nombre_archivo);
+int cargar_archivo_configuracion();
 
 int main(int argc, char *argv[])
 {
+	char *nombre_archivo;
+
 	if (argc < 3) {
 		fprintf(stderr,"usage %s hostname port\n", argv[0]);
 	    exit(0);
 	}
 
-	socket_client(argv[1],argv[2]);
+	nombre_archivo="/home/utnso/hola1";
+	//nombre_archivo=argv[1] //Implementacion verdadera
+
+	cargar_archivo_configuracion();
+	socket_client(nombre_archivo);
 
     return 0;
 }
 
 //FUNCIONES +++++++++++++++++++++++++++++++++++
-int socket_client(char* host,char* puerto){
+int socket_client(char *nombre_archivo){
+
 		int sockfd, portno;
 	    struct sockaddr_in serv_addr;
 	    struct hostent *server;
@@ -69,8 +80,9 @@ int socket_client(char* host,char* puerto){
 	        error("ERROR connecting");
 	    }
 
+
 		//Enviar codigo
-	    if((send_ansisop_file(sockfd)) != 0){
+	    if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 	    	error("ERROR en el send_ansisop_file");
 	   }
 
@@ -86,7 +98,7 @@ int socket_client(char* host,char* puerto){
 				return -1;//No retorna con error, es un error del flujo normal
 			}
 		   if( strstr(buffer,"mmp") != NULL){
-			   if((send_ansisop_file(sockfd)) != 0){
+			   if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 					error("ERROR en el send_ansisop_file");
 			   }
 			}
@@ -118,8 +130,7 @@ void error(const char *msg)
     perror(msg);
     exit(0);
 }
-int send_ansisop_file(int sockfd){
-	char *nombre_archivo="/home/utnso/hola1";
+int send_ansisop_file(int sockfd,char *nombre_archivo){
 	char *buffer=leer_archivo(nombre_archivo);
 
 	enviar_mensaje(buffer,sockfd);
@@ -127,5 +138,34 @@ int send_ansisop_file(int sockfd){
 	return 0;
 }
 
+int cargar_archivo_configuracion(){
+	char *nombre_archivo="pi.conf";
+	char *texto_del_archivo = leer_archivo(nombre_archivo);
+	char *linea;
+	char *valor;
+
+	while( texto_del_archivo != NULL){
+		linea = strtok(texto_del_archivo,"\n");
+		texto_del_archivo = strtok(NULL,"\0");
+
+		if( strstr(linea,"puerto")){
+			valor = strtok(linea," ");
+			valor = strtok(NULL,";");
+			if( valor != NULL ){
+				puerto=valor;
+			}
+		}
+		if( strstr(linea,"host")){
+			valor = strtok(linea," ");
+			valor = strtok(NULL,";");
+			if( valor != NULL ){
+				host=valor;
+			}
+		}
+
+	}
+
+	return 0;
+}
 
 
