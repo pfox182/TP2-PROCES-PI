@@ -78,6 +78,7 @@ int socket_client(char* host,char* puerto){
 	   if ( recibir_mensaje(buffer,sockfd) == -1){
 		   return -1;
 	   }
+
 	   while( strstr(buffer,"finalizado") == NULL ){
 		   printf("%s\n",buffer);
 		   if( strstr(buffer,"mps") != NULL){
@@ -90,11 +91,16 @@ int socket_client(char* host,char* puerto){
 			   }
 			}
 		   if( strstr(buffer,"suspendido") != NULL){
-			   //tenemos que responder
+		   //LOGICA DEL SUSPEND
+			   if ( scanf("%s",respuesta) == -1 ){
+				   printf("Error en el scanf\n");
+			   }
 			   printf("La respuesta que ingresaste es %s\n",respuesta);
+
 			   if ( enviar_mensaje(respuesta,sockfd) == -1){
 				   return -1;
 			   }
+		   //FIN SUSPEND
 		   }
 		   if ( recibir_mensaje(buffer,sockfd) == -1){
 			   return -1;
