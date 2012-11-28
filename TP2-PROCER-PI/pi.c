@@ -34,13 +34,15 @@ int main(int argc, char *argv[])
 {
 	char *nombre_archivo;
 
+	/*
 	if (argc < 3) {
 		fprintf(stderr,"usage %s hostname port\n", argv[0]);
 	    exit(0);
 	}
+	*/
 
-	nombre_archivo="/home/utnso/hola1";
-	//nombre_archivo=argv[1] //Implementacion verdadera
+	//nombre_archivo="/home/utnso/hola1";
+	nombre_archivo=argv[1]; //Implementacion verdadera
 
 	cargar_archivo_configuracion();
 	socket_client(nombre_archivo);
@@ -87,7 +89,7 @@ int socket_client(char *nombre_archivo){
 	   }
 
 	   //Recibimos fin,imprimir y suspend
-	   if ( recibir_mensaje(buffer,sockfd) == -1){
+	   if ( recibir_mensaje(&buffer,sockfd) == -1){
 		   return -1;
 	   }
 
@@ -114,7 +116,7 @@ int socket_client(char *nombre_archivo){
 			   }
 		   //FIN SUSPEND
 		   }
-		   if ( recibir_mensaje(buffer,sockfd) == -1){
+		   if ( recibir_mensaje(&buffer,sockfd) == -1){
 			   return -1;
 		   }
 	   }
@@ -131,6 +133,7 @@ void error(const char *msg)
     exit(0);
 }
 int send_ansisop_file(int sockfd,char *nombre_archivo){
+	printf("Vamos a leer el archivo %s\n",nombre_archivo);
 	char *buffer=leer_archivo(nombre_archivo);
 
 	enviar_mensaje(buffer,sockfd);
@@ -139,8 +142,8 @@ int send_ansisop_file(int sockfd,char *nombre_archivo){
 }
 
 int cargar_archivo_configuracion(){
-	char *nombre_archivo="pi.conf";
-	char *texto_del_archivo = leer_archivo(nombre_archivo);
+	char *nombre_archivo_conf="/home/utnso/pi.conf";
+	char *texto_del_archivo = leer_archivo(nombre_archivo_conf);
 	char *linea;
 	char *valor;
 

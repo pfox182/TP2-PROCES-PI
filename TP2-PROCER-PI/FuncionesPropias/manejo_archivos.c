@@ -19,12 +19,10 @@ char * leer_archivo(char *nombre_archivo){
 		printf("Error de apertura del archivo\n");
 	}
 
-
 	while(feof(archivo) == 0){
 		caracter = fgetc(archivo);
 		buffer[cant_caracteres]=caracter;
 		cant_caracteres++;
-		//fscanf(archivo,"%s", *buffer) != EOF //Otra forma de leer
 	}
 	buffer[cant_caracteres]='\0';
 

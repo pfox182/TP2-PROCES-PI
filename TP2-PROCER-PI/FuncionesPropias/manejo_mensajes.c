@@ -32,32 +32,33 @@ int enviar_mensaje(char* mensaje,int socket_client){
 
 }
 
-int recibir_mensaje(char* mensaje,int socket_client){
+int recibir_mensaje(char** mensaje,int socket_client){
 
 	int nbytes;
 	int header;
 
-	//Recibimos el header del PI
-	if( (nbytes = recv(socket_client,&header,sizeof(header),0)) <= 0){
-		 //Error o conexion cerrada por el cliente
-		 if( nbytes == 0){
-			 //Conexion cerrada
-			 printf("El socket %d cerro la conexion\n",socket_client);
-			 return -1;
-		 }else{
-			 printf("Error al recibir datos del header");
+		//Recibimos el header del PI
+		if( (nbytes = recv(socket_client,&header,sizeof(header),0)) <= 0){
+			 //Error o conexion cerrada por el cliente
+			 if( nbytes == 0){
+				 //Conexion cerrada
+				 printf("El socket %d cerro la conexion\n",socket_client);
+				 return -1;
+			 }else{
+				 printf("Error al recibir datos del header");
+				 return -1;
+			 }
+		}
+
+		 printf("El header recibido es: %d \n",header);
+		 //Seteamos el tamaño del mensaje
+		 *mensaje=(char *)realloc(*mensaje,header);
+		 bzero(*mensaje,header);
+		 if (( recvall(socket_client,*mensaje,&header,0)) == -1){
+			 printf("Error al recibir datos del archivo");
 			 return -1;
 		 }
-	}
 
-	 printf("El header recibido es: %d \n",header);
-	 //Seteamos el tamaño del mensaje
-	 mensaje=(char *)realloc(mensaje,header);
-	 bzero(mensaje,header);
-	 if (( recvall(socket_client,mensaje,&header,0)) == -1){
-		 printf("Error al recibir datos del archivo");
-		 return -1;
-	 }
 
 	return 0;
 }
