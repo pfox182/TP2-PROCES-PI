@@ -34,17 +34,15 @@ int main(int argc, char *argv[])
 {
 	char *nombre_archivo;
 
-	/*
-	if (argc < 3) {
-		fprintf(stderr,"usage %s hostname port\n", argv[0]);
-	    exit(0);
-	}
-	*/
+	host=getenv("PP_IP");
+	puerto=getenv("PP_Puerto");
+
+	printf("El host %s y puerto %s\n",host,puerto);
 
 	//nombre_archivo="/home/utnso/hola1";
 	nombre_archivo=argv[1]; //Implementacion verdadera
 
-	cargar_archivo_configuracion();
+	//cargar_archivo_configuracion();
 	socket_client(nombre_archivo);
 
     return 0;
@@ -57,6 +55,7 @@ int socket_client(char *nombre_archivo){
 	    struct sockaddr_in serv_addr;
 	    struct hostent *server;
 	    char *buffer=(char *)malloc(BUFFER_SIZE);//Se hace realloc en recibir mensaje
+	    bzero(buffer,BUFFER_SIZE);
 	    char *respuesta=(char *)malloc(strlen("si"));
 
 	    portno = atoi(puerto);
@@ -99,7 +98,7 @@ int socket_client(char *nombre_archivo){
 				close(sockfd);
 				return -1;//No retorna con error, es un error del flujo normal
 			}
-		   if( strstr(buffer,"mmp") != NULL){
+		   if( strstr(buffer,"Enviame el codigo") != NULL){
 			   if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 					error("ERROR en el send_ansisop_file");
 			   }
@@ -116,6 +115,7 @@ int socket_client(char *nombre_archivo){
 			   }
 		   //FIN SUSPEND
 		   }
+		   bzero(buffer,strlen(buffer));
 		   if ( recibir_mensaje(&buffer,sockfd) == -1){
 			   return -1;
 		   }
