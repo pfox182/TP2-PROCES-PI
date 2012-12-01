@@ -16,13 +16,13 @@ int enviar_mensaje(char* mensaje,int socket_client){
 
 		//Armamos el paquete a enviar al server
 		int header = strlen(mensaje);
-		printf("Header:%d\n",header);
+		//printf("Header:%d\n",header);
 		//Enviamos el header para indicar el tamaño del paquete
 		if( send(socket_client,&header,sizeof(header),0) == -1){
 			printf("Error al enviar el header\n");
 			return -1;
 		}
-		printf("Mensaje:%s\n",mensaje);
+		//printf("Mensaje:%s\n",mensaje);
 		//Enviamos el paquete
 		if( sendall(socket_client,&(*mensaje),&header) == -1){
 			printf("Error al enviar el paquete\n");
@@ -50,7 +50,7 @@ int recibir_mensaje(char** mensaje,int socket_client){
 			 }
 		}
 
-		 printf("El header recibido es: %d \n",header);
+		 //printf("El header recibido es: %d \n",header);
 		 //Seteamos el tamaño del mensaje
 		 //*mensaje=realloc(*mensaje,header);
 		 bzero(*mensaje,header);

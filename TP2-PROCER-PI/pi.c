@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include "Log/manejo_log.h"
 
 #define BUFFER_SIZE 1024 //TODO:nose
 //Variables globales
@@ -40,7 +41,6 @@ int main(int argc, char *argv[])
 	puerto=getenv("PP_Puerto");
 	prioridad=getenv("Prioridad_PRI");
 
-	printf("El host %s y puerto %s\n",host,puerto);
 
 	//nombre_archivo="/home/utnso/hola1";
 	nombre_archivo=argv[1]; //Implementacion verdadera
@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
 
 //FUNCIONES +++++++++++++++++++++++++++++++++++
 int socket_client(char *nombre_archivo){
+		char *log_txt=(char *)malloc(1024);
+		char *pid;
 
 		int sockfd, portno;
 	    struct sockaddr_in serv_addr;
@@ -104,6 +106,13 @@ int socket_client(char *nombre_archivo){
 				close(sockfd);
 				return -1;//No retorna con error, es un error del flujo normal
 			}
+		   if( strstr(buffer,"creo el proceso") != NULL){
+			   bzero(log_txt,1024);
+			   memcpy(log_txt,buffer,strlen(buffer));
+			   pid=strtok(log_txt,"=");
+			   pid=strtok(NULL,"\n");
+			   logx(atoi(pid),"Se creo el proceso.");
+			}
 		   if( strstr(buffer,"Enviame el codigo") != NULL){
 			   if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 					error("ERROR en el send_ansisop_file");
@@ -114,10 +123,16 @@ int socket_client(char *nombre_archivo){
 			}
 		   if( strstr(buffer,"suspendido") != NULL){
 		   //LOGICA DEL SUSPEND
+			   printf("%s\n",buffer);
+			   bzero(log_txt,1024);
+			   memcpy(log_txt,buffer,strlen(buffer));
+			   pid=strtok(log_txt,"=");
+			   pid=strtok(NULL,"\n");
+			   logx(atoi(pid),buffer);
+
 			   if ( scanf("%s",respuesta) == -1 ){
 				   printf("Error en el scanf\n");
 			   }
-			   printf("La respuesta que ingresaste es %s\n",respuesta);
 
 			   if ( enviar_mensaje(respuesta,sockfd) == -1){
 				   return -1;
@@ -130,7 +145,12 @@ int socket_client(char *nombre_archivo){
 		   }
 	   }
 
-	   printf("El buffer es: %s\n",buffer);
+	   printf("%s\n",buffer);
+	   bzero(log_txt,1024);
+	   memcpy(log_txt,buffer,strlen(buffer));
+	   pid=strtok(log_txt,"=");
+	   pid=strtok(NULL,"\n");
+	   logx(atoi(pid),buffer);
 
 	   //close(sockfd);
 
@@ -142,7 +162,6 @@ void error(const char *msg)
     exit(0);
 }
 int send_ansisop_file(int sockfd,char *nombre_archivo){
-	printf("Vamos a leer el archivo %s\n",nombre_archivo);
 	char *buffer=leer_archivo(nombre_archivo);
 
 	enviar_mensaje(buffer,sockfd);
