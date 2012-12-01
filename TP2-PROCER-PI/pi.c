@@ -20,6 +20,7 @@
 //Variables globales
 char *host;
 char *puerto;
+char *prioridad;
 
 //Includes propios
 #include "FuncionesPropias/manejo_archivos.h"
@@ -34,8 +35,10 @@ int main(int argc, char *argv[])
 {
 	char *nombre_archivo;
 
+
 	host=getenv("PP_IP");
 	puerto=getenv("PP_Puerto");
+	prioridad=getenv("Prioridad_PRI");
 
 	printf("El host %s y puerto %s\n",host,puerto);
 
@@ -86,6 +89,9 @@ int socket_client(char *nombre_archivo){
 	    if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 	    	error("ERROR en el send_ansisop_file");
 	   }
+	    if(enviar_mensaje(prioridad,sockfd) == -1){
+	    	error("Error al enviar la prioridad.");
+	    }
 
 	   //Recibimos fin,imprimir y suspend
 	   if ( recibir_mensaje(&buffer,sockfd) == -1){
@@ -102,6 +108,9 @@ int socket_client(char *nombre_archivo){
 			   if((send_ansisop_file(sockfd,nombre_archivo)) != 0){
 					error("ERROR en el send_ansisop_file");
 			   }
+			   if(enviar_mensaje(prioridad,sockfd) == -1){
+					error("Error al enviar la prioridad.");
+				}
 			}
 		   if( strstr(buffer,"suspendido") != NULL){
 		   //LOGICA DEL SUSPEND
