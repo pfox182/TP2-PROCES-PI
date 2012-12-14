@@ -101,8 +101,10 @@ int socket_client(char *nombre_archivo){
 	   }
 
 	   while( strstr(buffer,"finalizado") == NULL ){
-		   printf("%s\n",buffer);
-		   if( strstr(buffer,"mps") != NULL){
+		  if(strstr(buffer,"Enviame el codigo") == NULL){
+			  printf("%s\n",buffer);
+		  }
+		  if( strstr(buffer,"mps") != NULL){
 				close(sockfd);
 				return -1;//No retorna con error, es un error del flujo normal
 			}
