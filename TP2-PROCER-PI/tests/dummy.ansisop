@@ -1,0 +1,8 @@
+#!/home/utnso/pi
+
+variables p
+
+comienzo_programa
+p=p+30;20
+imprimir p
+fin_programa

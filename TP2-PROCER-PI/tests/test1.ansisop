@@ -1,0 +1,16 @@
+#!/home/utnso/pi
+
+variables i,b,c
+
+comienzo_programa
+
+i=0
+inicio_for:
+i=i+1
+imprimir i
+c=io(10,1)
+b=i-10
+snc b inicio_for
+# ejecuto io bloqueante de 10 unidades, 10 veces
+
+fin_programa

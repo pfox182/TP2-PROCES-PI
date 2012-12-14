@@ -1,0 +1,4 @@
+#!/bin/bash
+export PP_IP=127.0.0.1
+export PP_Puerto=5000
+export Prioridad_PRI=0
