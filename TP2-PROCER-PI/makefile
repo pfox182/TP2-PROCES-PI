@@ -125,6 +125,8 @@ TP2-PROCER-PI: $(OBJS) $(USER_OBJS)
 	gcc  -o "TP2-PROCER-PI" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
+	
+	cp TP2-PROCER-PI /home/utnso/pi
 
 # Other Targets
 clean:
